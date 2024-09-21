@@ -1,0 +1,67 @@
+version: "3.9"
+
+networks:
+  laravel-app:
+
+services:
+  nginx:
+    image: nginx:stable-alpine
+    container_name: nginx-web
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    volumes_from:
+      - php
+    depends_on:
+      - php
+      - mysql
+    networks:
+      - laravel-app
+
+  mysql:
+    image: mysql:latest
+    container_name: mysql-web
+    restart: unless-stopped
+    tty: true
+    ports:
+      - "4036:3306"
+    volumes:
+      - dbdata:/var/lib/mysql
+    environment:
+      MYSQL_DATABASE: db_docker
+      MYSQL_USER: docker
+      MYSQL_PASSWORD: qwerty
+      MYSQL_ROOT_PASSWORD: qwerty
+    networks:
+      - laravel-app
+
+  php:
+    image: php:8.2-fpm
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: php-laravel-app
+    volumes:
+      - .:/var/www/html
+    ports:
+      - "9000:9000"
+    networks:
+      - laravel-app
+#   phpmyadmin:
+#     image: phpmyadmin/phpmyadmin
+#     restart: always
+#     container_name: phpmyadmin
+#     depends_on:
+#       - mysql
+#     ports:
+#       - "8081:80"
+#     environment:
+#       PMA_HOST: mysql
+#       MYSQL_ROOT_PASSWORD: secret
+#     networks:
+#       - laravel-app
+
+volumes:
+  dbdata:
