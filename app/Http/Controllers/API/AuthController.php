@@ -64,6 +64,7 @@ class AuthController extends Controller
         $name = $auth->name;
     
         return response()->json([
+            'code' => 200,
             'success' => true,
             'message' => 'Login sukses',
             'data' => [
